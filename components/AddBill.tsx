@@ -1,14 +1,15 @@
 
 import React, { useState } from 'react';
-import { Roommate, Bill, BillCategory } from '../types';
+import { Roommate, Bill, BillCategory, ChronoTheme } from '../types';
 
 interface AddBillProps {
   roommates: Roommate[];
+  theme: ChronoTheme;
   onSave: (bill: Bill) => void;
   onCancel: () => void;
 }
 
-const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
+const AddBill: React.FC<AddBillProps> = ({ roommates, theme, onSave, onCancel }) => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState<string>("");
   const [category, setCategory] = useState<BillCategory>("Other");
@@ -19,12 +20,9 @@ const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
   );
 
   const categories: { label: BillCategory; icon: string }[] = [
-    { label: 'Groceries', icon: '🛒' },
-    { label: 'Rent', icon: '🏠' },
-    { label: 'Utilities', icon: '🔌' },
-    { label: 'Dining', icon: '🍕' },
-    { label: 'Fun', icon: '🎉' },
-    { label: 'Other', icon: '📦' }
+    { label: 'Groceries', icon: '🛒' }, { label: 'Rent', icon: '🏠' },
+    { label: 'Utilities', icon: '🔌' }, { label: 'Dining', icon: '🍕' },
+    { label: 'Fun', icon: '🎉' }, { label: 'Other', icon: '📦' }
   ];
 
   const handleSave = () => {
@@ -40,46 +38,42 @@ const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
         roommateId: r.id, 
         amount: parseFloat(customSplits[r.id]) || 0 
       }));
-      const splitTotal = splits.reduce((s, split) => s + split.amount, 0);
-      if (Math.abs(splitTotal - total) > 0.5) {
-        alert("Split total doesn't match bill amount!");
-        return;
-      }
     }
 
     onSave({
       id: Date.now().toString(),
-      title,
-      amount: total,
-      category,
-      paidById: paidBy,
-      date: new Date().toISOString(),
-      splits,
-      isSettled: false
+      title, amount: total, category,
+      paidById: paidBy, date: new Date().toISOString(),
+      splits, isSettled: false
     });
   };
 
   return (
-    <div className="flex-1 flex flex-col p-8 pt-16 bg-[#161616] animate-in fade-in slide-in-from-bottom-6 duration-500">
-      <div className="flex justify-between items-center mb-10">
-        <h2 className="text-3xl font-black">New Bill</h2>
-        <button onClick={onCancel} className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Cancel</button>
-      </div>
+    <div className="flex-1 flex flex-col px-8 pt-20 pb-40 animate-reveal">
+      <header className="flex justify-between items-center mb-16">
+        <h2 className="text-2xl font-black tracking-tighter opacity-90">New Entry</h2>
+        <button onClick={onCancel} className="text-[10px] font-black uppercase tracking-widest opacity-30">Discard</button>
+      </header>
 
-      <div className="space-y-10 overflow-y-auto no-scrollbar pb-24">
-        {/* Basic Info */}
-        <div className="space-y-6">
+      <div className="space-y-12 flex-1 overflow-y-auto no-scrollbar pb-10">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 px-1">Descriptor</p>
           <input 
-            className="w-full bg-transparent text-3xl font-bold border-none outline-none placeholder:text-zinc-800"
-            placeholder="What for? (e.g. Rent)"
+            className="w-full bg-transparent text-4xl font-black border-none outline-none placeholder:opacity-10"
+            placeholder="e.g. WiFi"
             value={title}
+            autoFocus
             onChange={e => setTitle(e.target.value)}
           />
-          <div className="flex items-center border-b-2 border-zinc-800 focus-within:border-indigo-500 transition-colors pb-2">
-            <span className="text-3xl font-black text-zinc-600 mr-2">₹</span>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 px-1">Value</p>
+          <div className="flex items-center">
+            <span className="text-4xl font-black opacity-10 mr-3">₹</span>
             <input 
               type="number"
-              className="w-full bg-transparent text-4xl font-black border-none outline-none placeholder:text-zinc-800"
+              className="w-full bg-transparent text-8xl font-black border-none outline-none placeholder:opacity-5"
               placeholder="0"
               value={amount}
               onChange={e => setAmount(e.target.value)}
@@ -87,95 +81,57 @@ const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
           </div>
         </div>
 
-        {/* Category Selector */}
-        <div>
-          <label className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-4 block">Category</label>
-          <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 px-1">Category</p>
+          <div className="grid grid-cols-3 gap-3">
             {categories.map(cat => (
               <button 
                 key={cat.label}
                 onClick={() => setCategory(cat.label)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all border ${
+                className={`h-24 rounded-[2.5rem] flex flex-col items-center justify-center gap-2 transition-all hardware-btn ${
                   category === cat.label 
-                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/10' 
-                    : 'bg-zinc-900 border-white/5 text-zinc-500'
+                    ? (theme === 'MIDNIGHT' ? 'bg-white text-black' : 'bg-black text-white') 
+                    : 'surface opacity-40'
                 }`}
               >
-                <span className="text-xl">{cat.icon}</span>
+                <span className="text-2xl">{cat.icon}</span>
                 <span className="text-[9px] font-black uppercase tracking-widest">{cat.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Paid By */}
-        <div>
-          <label className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-4 block">Paid By</label>
-          <div className="flex flex-wrap gap-3">
+        <div className="space-y-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 px-1">Payor</p>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
             {roommates.map(r => (
               <button 
                 key={r.id}
                 onClick={() => setPaidBy(r.id)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-2xl transition-all ${
-                  paidBy === r.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-zinc-900 text-zinc-500'
+                className={`shrink-0 flex items-center gap-4 px-8 py-5 rounded-full transition-all hardware-btn ${
+                  paidBy === r.id ? (theme === 'MIDNIGHT' ? 'bg-white text-black' : 'bg-black text-white') : 'surface opacity-40'
                 }`}
               >
-                <span className="text-lg">{r.emoji}</span>
-                <span className="font-bold text-sm">{r.name}</span>
+                <span className="text-2xl">{r.emoji}</span>
+                <span className="text-xs font-black uppercase tracking-widest">{r.name}</span>
               </button>
             ))}
           </div>
         </div>
-
-        {/* Split Logic */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <label className="text-[10px] uppercase font-black tracking-widest text-zinc-600">Split</label>
-            <button 
-              onClick={() => setIsCustom(!isCustom)}
-              className="text-[10px] uppercase font-black tracking-widest text-indigo-500"
-            >
-              {isCustom ? 'Equal Split' : 'Custom Split'}
-            </button>
-          </div>
-
-          {!isCustom ? (
-            <div className="bg-zinc-900/50 rounded-3xl p-6 text-center border border-white/5">
-              <p className="text-zinc-500 text-sm">Split equally between {roommates.length} people</p>
-              {amount && <p className="text-xl font-black mt-2 text-white">₹{(parseFloat(amount) / roommates.length).toFixed(1)} <span className="text-xs text-zinc-600 font-normal">/ person</span></p>}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {roommates.map(r => (
-                <div key={r.id} className="flex items-center justify-between bg-zinc-900 rounded-3xl px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{r.emoji}</span>
-                    <span className="font-bold text-sm">{r.name}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-zinc-600 font-bold mr-1">₹</span>
-                    <input 
-                      type="number"
-                      placeholder="0"
-                      className="bg-transparent w-20 text-right font-black outline-none border-b border-zinc-800 focus:border-indigo-500"
-                      value={customSplits[r.id]}
-                      onChange={e => setCustomSplits(prev => ({ ...prev, [r.id]: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-8 pt-0 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent pointer-events-none">
-        <button 
-          onClick={handleSave}
-          className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl active:scale-95 shadow-2xl shadow-indigo-500/20 transition-all pointer-events-auto"
-        >
-          Save Bill
-        </button>
+      <div className="fixed bottom-0 left-0 right-0 p-10 flex justify-center pointer-events-none">
+        <div className="max-w-sm w-full pointer-events-auto">
+          <button 
+            onClick={handleSave}
+            disabled={!title || !amount}
+            className={`w-full h-18 rounded-full font-black uppercase tracking-[0.2em] text-[13px] transition-all hardware-btn ${
+              (!title || !amount) ? 'surface opacity-20' : (theme === 'MIDNIGHT' ? 'bg-white text-black' : 'bg-black text-white')
+            }`}
+          >
+            Create Record
+          </button>
+        </div>
       </div>
     </div>
   );

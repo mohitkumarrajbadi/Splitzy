@@ -92,8 +92,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onChatClick, onBack }) 
               <div>
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Connections</h4>
                 <div className="flex gap-3">
+                  {/* Fixed: cast value to string to satisfy title property requirement */}
                   {Object.entries(user.linkedAccounts || {}).map(([key, value]) => (
-                    <div key={key} title={value} className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 cursor-help transition-colors">
+                    <div key={key} title={value as string} className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 cursor-help transition-colors">
                       <span className="opacity-50 grayscale">{key === 'github' ? '💻' : key === 'linkedin' ? '🔗' : '📸'}</span>
                     </div>
                   ))}

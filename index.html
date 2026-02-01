@@ -1,43 +1,97 @@
 
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Splitzy | Roommate Bills</title>
+    <title>Splitzy | Precision Finance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <style>
       :root {
-        --bg-charcoal: #121212;
-        --card-bg: #1e1e1e;
-        --accent: #6366f1;
+        --chrono-bg: #FFFFFF;
+        --chrono-text: #000000;
+        --chrono-surface: #F2F2F7;
+        --chrono-border: rgba(0,0,0,0.05);
+        --chrono-accent: #007AFF;
       }
+
+      /* DAWN: 5 AM - 9 AM */
+      .theme-DAWN {
+        --chrono-bg: #F9F9FF;
+        --chrono-text: #1C1C1E;
+        --chrono-surface: #FFFFFF;
+        --chrono-border: rgba(0,0,0,0.04);
+        --chrono-accent: #5856D6;
+      }
+
+      /* DAY: 9 AM - 5 PM */
+      .theme-DAY {
+        --chrono-bg: #FFFFFF;
+        --chrono-text: #000000;
+        --chrono-surface: #F2F2F7;
+        --chrono-border: rgba(0,0,0,0.08);
+        --chrono-accent: #007AFF;
+      }
+
+      /* SUNSET: 5 PM - 9 PM */
+      .theme-SUNSET {
+        --chrono-bg: #FFF9F2;
+        --chrono-text: #2C2C2E;
+        --chrono-surface: #FFFFFF;
+        --chrono-border: rgba(255,149,0,0.1);
+        --chrono-accent: #FF9500;
+      }
+
+      /* MIDNIGHT: 9 PM - 5 AM */
+      .theme-MIDNIGHT {
+        --chrono-bg: #000000;
+        --chrono-text: #F2F2F7;
+        --chrono-surface: #1C1C1E;
+        --chrono-border: rgba(255,255,255,0.08);
+        --chrono-accent: #FFFFFF;
+      }
+
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: var(--bg-charcoal);
-        color: #FFFFFF;
-        overflow-x: hidden;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: var(--chrono-bg);
+        color: var(--chrono-text);
+        transition: background-color 1s ease, color 1s ease;
         -webkit-font-smoothing: antialiased;
+        letter-spacing: -0.015em;
+        overflow-x: hidden;
       }
+
+      .surface {
+        background-color: var(--chrono-surface);
+        border: 0.5px solid var(--chrono-border);
+        transition: all 0.5s ease;
+      }
+
       .glass {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 0.5px solid var(--chrono-border);
       }
-      .card-shadow {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      }
+
       .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      .tap-highlight-none { -webkit-tap-highlight-color: transparent; }
       
-      input[type="number"]::-webkit-inner-spin-button,
-      input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+      .hardware-btn {
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+      }
+      .hardware-btn:active {
+        transform: scale(0.96);
+      }
+
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-reveal {
+        animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
     </style>
   <script type="importmap">

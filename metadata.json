@@ -1,5 +1,7 @@
 {
   "name": "Splitzy",
   "description": "Minimal, beautiful bill splitting for roommates. No jargon, just clarity.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }

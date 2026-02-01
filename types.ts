@@ -4,11 +4,16 @@ export enum AppView {
   HOME = 'HOME',
   ADD_BILL = 'ADD_BILL',
   HISTORY = 'HISTORY',
+  // Added social discovery views
   DASHBOARD = 'DASHBOARD',
   RESULTS = 'RESULTS',
   CHAT = 'CHAT',
   PROFILE = 'PROFILE'
 }
+
+export type ChronoTheme = 'DAWN' | 'DAY' | 'SUNSET' | 'MIDNIGHT';
+
+export type SyncStatus = 'LOCAL_ONLY' | 'SYNCING' | 'SYNCED' | 'ERROR';
 
 export type BillCategory = 'Groceries' | 'Rent' | 'Utilities' | 'Dining' | 'Fun' | 'Other';
 
@@ -46,12 +51,10 @@ export interface SpendingStats {
   monthlyTotal: number;
 }
 
-export interface UserBalance {
-  roommateId: string;
-  net: number; // Positive = owed, Negative = owes
-}
+/**
+ * Social Discovery Types (VYBE)
+ */
 
-// VYBE Social App Types
 export type IntentType = 'BUILD' | 'DATE' | 'EXPLORE' | 'TRADE' | 'STAY' | 'UNKNOWN';
 
 export interface UserProfile {
@@ -68,13 +71,14 @@ export interface UserProfile {
   whyMatched: string;
   skills?: string[];
   interests?: string[];
-  availability?: IntentType[];
+  availability: IntentType[];
   trustScore: number;
   verified: boolean;
   linkedAccounts?: {
     github?: string;
     linkedin?: string;
     instagram?: string;
+    [key: string]: string | undefined;
   };
 }
 

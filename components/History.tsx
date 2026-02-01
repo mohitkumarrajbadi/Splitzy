@@ -1,40 +1,41 @@
 
 import React from 'react';
-import { Bill, Roommate, BillCategory } from '../types';
+import { Bill, Roommate, BillCategory, ChronoTheme } from '../types';
 
 interface HistoryProps {
   bills: Bill[];
   roommates: Roommate[];
+  theme: ChronoTheme;
   onBack: () => void;
   onDelete: (id: string) => void;
 }
 
-const History: React.FC<HistoryProps> = ({ bills, roommates, onBack, onDelete }) => {
+// Fixed HistoryProps to include the 'theme' prop required by the App component
+const History: React.FC<HistoryProps> = ({ bills, roommates, theme, onBack, onDelete }) => {
   const getRmate = (id: string) => roommates.find(r => r.id === id);
 
   const categoryIcons: Record<BillCategory, string> = {
-    'Groceries': '🛒',
-    'Rent': '🏠',
-    'Utilities': '🔌',
-    'Dining': '🍕',
-    'Fun': '🎉',
-    'Other': '📦'
+    'Groceries': '🛒', 'Rent': '🏠', 'Utilities': '🔌', 'Dining': '🍕', 'Fun': '🎉', 'Other': '📦'
   };
 
   return (
-    <div className="flex-1 flex flex-col p-8 pt-16 bg-[#121212]">
-      <div className="flex items-center gap-4 mb-10">
-        <button onClick={onBack} className="text-2xl hover:scale-110 active:scale-90 transition-all">←</button>
+    <div className="flex-1 flex flex-col px-7 pt-16 pb-10 animate-soft-fade-up">
+      <header className="flex items-center gap-4 mb-12">
+        <button onClick={onBack} className="h-10 w-10 flex items-center justify-center rounded-full surface hover:bg-zinc-800 transition-colors">
+          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         <div>
-          <h2 className="text-2xl font-black">Bill History</h2>
-          <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{bills.length} total entries</p>
+          <h2 className="text-xl font-black text-white tracking-tight">Timeline</h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">{bills.length} total events</p>
         </div>
-      </div>
+      </header>
 
       {bills.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 opacity-20">
-          <span className="text-5xl">🏜️</span>
-          <p className="font-bold">No bills recorded yet.</p>
+        <div className="flex-1 flex flex-col items-center justify-center text-center opacity-30 p-20">
+          <span className="text-5xl mb-6">🗞️</span>
+          <p className="text-sm font-bold uppercase tracking-widest leading-loose">The record is currently empty</p>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-20">
@@ -43,46 +44,53 @@ const History: React.FC<HistoryProps> = ({ bills, roommates, onBack, onDelete })
             return (
               <div 
                 key={bill.id} 
-                className={`relative group bg-zinc-900 rounded-[2rem] p-6 border border-white/5 transition-all ${
-                  bill.isSettled ? 'opacity-40 grayscale blur-[0.5px]' : ''
+                className={`surface rounded-[2rem] p-6 relative group transition-all duration-500 ${
+                  bill.isSettled ? 'opacity-40 grayscale blur-[0.3px]' : ''
                 }`}
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs bg-black p-1 rounded-md">{categoryIcons[bill.category || 'Other']}</span>
-                      <h4 className="text-lg font-black tracking-tight">{bill.title}</h4>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-black flex items-center justify-center text-xl border border-white/5">
+                      {categoryIcons[bill.category || 'Other']}
                     </div>
-                    <p className="text-[10px] text-zinc-600 font-bold uppercase">{new Date(bill.date).toLocaleDateString()}</p>
+                    <div>
+                      <h4 className="text-sm font-bold text-white tracking-tight">{bill.title}</h4>
+                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                        {new Date(bill.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-black text-white">₹{bill.amount.toFixed(0)}</p>
+                    <p className="text-lg font-black text-white">₹{bill.amount.toFixed(0)}</p>
                     {bill.isSettled && <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Settled</span>}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xs text-zinc-500">Paid by</span>
-                  <div className="flex items-center gap-1.5 bg-zinc-800 px-3 py-1 rounded-full">
-                    <span className="text-xs">{payer?.emoji}</span>
-                    <span className="text-[11px] font-bold text-zinc-300">{payer?.name}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-zinc-900 flex items-center justify-center text-[10px]">{payer?.emoji}</div>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Paid by {payer?.name}</span>
+                  </div>
+                  
+                  <div className="flex -space-x-2">
+                    {bill.splits.slice(0, 3).map(s => {
+                      const r = getRmate(s.roommateId);
+                      return (
+                        <div key={s.roommateId} className="h-6 w-6 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] border border-black" title={r?.name}>
+                          {r?.emoji}
+                        </div>
+                      );
+                    })}
+                    {bill.splits.length > 3 && (
+                      <div className="h-6 w-6 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-black border border-black">
+                        +{bill.splits.length - 3}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                  {bill.splits.map(s => {
-                    const r = getRmate(s.roommateId);
-                    return (
-                      <div key={s.roommateId} className="shrink-0 flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-xl border border-white/5">
-                        <span className="text-[10px]">{r?.emoji}</span>
-                        <span className="text-[10px] font-bold text-zinc-500">₹{s.amount.toFixed(0)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
                 <button 
-                  onClick={() => confirm("Delete this bill?") && onDelete(bill.id)}
+                  onClick={() => confirm("Remove this event?") && onDelete(bill.id)}
                   className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-rose-500 hover:scale-110 active:scale-90"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
