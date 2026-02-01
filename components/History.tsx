@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bill, Roommate } from '../types';
+import { Bill, Roommate, BillCategory } from '../types';
 
 interface HistoryProps {
   bills: Bill[];
@@ -11,6 +11,15 @@ interface HistoryProps {
 
 const History: React.FC<HistoryProps> = ({ bills, roommates, onBack, onDelete }) => {
   const getRmate = (id: string) => roommates.find(r => r.id === id);
+
+  const categoryIcons: Record<BillCategory, string> = {
+    'Groceries': '🛒',
+    'Rent': '🏠',
+    'Utilities': '🔌',
+    'Dining': '🍕',
+    'Fun': '🎉',
+    'Other': '📦'
+  };
 
   return (
     <div className="flex-1 flex flex-col p-8 pt-16 bg-[#121212]">
@@ -40,7 +49,10 @@ const History: React.FC<HistoryProps> = ({ bills, roommates, onBack, onDelete })
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h4 className="text-lg font-black tracking-tight">{bill.title}</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs bg-black p-1 rounded-md">{categoryIcons[bill.category || 'Other']}</span>
+                      <h4 className="text-lg font-black tracking-tight">{bill.title}</h4>
+                    </div>
                     <p className="text-[10px] text-zinc-600 font-bold uppercase">{new Date(bill.date).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">

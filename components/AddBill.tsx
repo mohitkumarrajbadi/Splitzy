@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Roommate, Bill } from '../types';
+import { Roommate, Bill, BillCategory } from '../types';
 
 interface AddBillProps {
   roommates: Roommate[];
@@ -11,11 +11,21 @@ interface AddBillProps {
 const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState<string>("");
+  const [category, setCategory] = useState<BillCategory>("Other");
   const [paidBy, setPaidBy] = useState(roommates[0].id);
   const [isCustom, setIsCustom] = useState(false);
   const [customSplits, setCustomSplits] = useState<Record<string, string>>(
     Object.fromEntries(roommates.map(r => [r.id, ""]))
   );
+
+  const categories: { label: BillCategory; icon: string }[] = [
+    { label: 'Groceries', icon: '🛒' },
+    { label: 'Rent', icon: '🏠' },
+    { label: 'Utilities', icon: '🔌' },
+    { label: 'Dining', icon: '🍕' },
+    { label: 'Fun', icon: '🎉' },
+    { label: 'Other', icon: '📦' }
+  ];
 
   const handleSave = () => {
     const total = parseFloat(amount);
@@ -30,7 +40,6 @@ const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
         roommateId: r.id, 
         amount: parseFloat(customSplits[r.id]) || 0 
       }));
-      // Validate total
       const splitTotal = splits.reduce((s, split) => s + split.amount, 0);
       if (Math.abs(splitTotal - total) > 0.5) {
         alert("Split total doesn't match bill amount!");
@@ -42,6 +51,7 @@ const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
       id: Date.now().toString(),
       title,
       amount: total,
+      category,
       paidById: paidBy,
       date: new Date().toISOString(),
       splits,
@@ -74,6 +84,27 @@ const AddBill: React.FC<AddBillProps> = ({ roommates, onSave, onCancel }) => {
               value={amount}
               onChange={e => setAmount(e.target.value)}
             />
+          </div>
+        </div>
+
+        {/* Category Selector */}
+        <div>
+          <label className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-4 block">Category</label>
+          <div className="grid grid-cols-3 gap-2">
+            {categories.map(cat => (
+              <button 
+                key={cat.label}
+                onClick={() => setCategory(cat.label)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all border ${
+                  category === cat.label 
+                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/10' 
+                    : 'bg-zinc-900 border-white/5 text-zinc-500'
+                }`}
+              >
+                <span className="text-xl">{cat.icon}</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">{cat.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 

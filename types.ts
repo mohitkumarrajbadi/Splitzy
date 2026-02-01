@@ -4,12 +4,13 @@ export enum AppView {
   HOME = 'HOME',
   ADD_BILL = 'ADD_BILL',
   HISTORY = 'HISTORY',
-  // Added views for VYBE integration
   DASHBOARD = 'DASHBOARD',
   RESULTS = 'RESULTS',
   CHAT = 'CHAT',
   PROFILE = 'PROFILE'
 }
+
+export type BillCategory = 'Groceries' | 'Rent' | 'Utilities' | 'Dining' | 'Fun' | 'Other';
 
 export interface Roommate {
   id: string;
@@ -26,6 +27,7 @@ export interface Bill {
   id: string;
   title: string;
   amount: number;
+  category: BillCategory;
   paidById: string;
   date: string;
   splits: BillSplit[];
@@ -38,16 +40,20 @@ export interface Debt {
   amount: number;
 }
 
+export interface SpendingStats {
+  totalSpent: number;
+  categoryTotals: Record<BillCategory, number>;
+  monthlyTotal: number;
+}
+
 export interface UserBalance {
   roommateId: string;
   net: number; // Positive = owed, Negative = owes
 }
 
 // VYBE Social App Types
-// Defines the possible search intents for the matching engine
 export type IntentType = 'BUILD' | 'DATE' | 'EXPLORE' | 'TRADE' | 'STAY' | 'UNKNOWN';
 
-// Represents a user profile within the VYBE social graph
 export interface UserProfile {
   id: string;
   name: string;
@@ -72,7 +78,6 @@ export interface UserProfile {
   };
 }
 
-// Represents a message in the chat interface
 export interface ChatMessage {
   id: string;
   senderId: string;

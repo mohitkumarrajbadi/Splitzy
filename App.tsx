@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { AppView, Roommate, Bill, Debt } from './types';
+import { AppView, Roommate, Bill, Debt, SpendingStats, BillCategory } from './types';
 import Setup from './components/Setup';
 import Home from './components/Home';
 import AddBill from './components/AddBill';
@@ -20,7 +20,12 @@ const App: React.FC = () => {
       const parsed = JSON.parse(saved);
       setGroupName(parsed.groupName);
       setRoommates(parsed.roommates);
-      setBills(parsed.bills);
+      // Migrate old data if categories are missing
+      const migratedBills = (parsed.bills || []).map((b: any) => ({
+        ...b,
+        category: b.category || 'Other'
+      }));
+      setBills(migratedBills);
       setCurrentUser(parsed.roommates[0]?.id || null);
       setView(AppView.HOME);
     }
@@ -33,20 +38,47 @@ const App: React.FC = () => {
     }
   }, [groupName, roommates, bills]);
 
+  const stats: SpendingStats = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const categoryTotals: Record<BillCategory, number> = {
+      'Groceries': 0,
+      'Rent': 0,
+      'Utilities': 0,
+      'Dining': 0,
+      'Fun': 0,
+      'Other': 0
+    };
+
+    let totalSpent = 0;
+    let monthlyTotal = 0;
+
+    bills.forEach(bill => {
+      totalSpent += bill.amount;
+      categoryTotals[bill.category] += bill.amount;
+
+      const billDate = new Date(bill.date);
+      if (billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear) {
+        monthlyTotal += bill.amount;
+      }
+    });
+
+    return { totalSpent, categoryTotals, monthlyTotal };
+  }, [bills]);
+
   const debts = useMemo(() => {
     const balanceMatrix: Record<string, number> = {};
     roommates.forEach(r => balanceMatrix[r.id] = 0);
 
     bills.filter(b => !b.isSettled).forEach(bill => {
-      // The person who paid gets the credit
       balanceMatrix[bill.paidById] += bill.amount;
-      // Everyone who partakes gets the debit
       bill.splits.forEach(split => {
         balanceMatrix[split.roommateId] -= split.amount;
       });
     });
 
-    // Simplify debts logic
     const calculatedDebts: Debt[] = [];
     const creditors = roommates.filter(r => balanceMatrix[r.id] > 0.01)
       .sort((a, b) => balanceMatrix[b.id] - balanceMatrix[a.id]);
@@ -73,13 +105,21 @@ const App: React.FC = () => {
     return calculatedDebts;
   }, [bills, roommates]);
 
-  const handleSettle = (fromId: string, toId: string) => {
-    // For simplicity in MVP, we create a "settlement" bill that balances it out
-    // or we mark all bills between them as settled if the math matches.
-    // Simpler approach: toggle all current bills to settled.
-    if (confirm("Mark all current dues as settled?")) {
-      setBills(prev => prev.map(b => ({ ...b, isSettled: true })));
-    }
+  const exportData = () => {
+    const data = {
+      exportDate: new Date().toISOString(),
+      groupName,
+      roommates,
+      bills,
+      stats
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `splitzy_${groupName.toLowerCase().replace(/\s+/g, '_')}_data.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const renderView = () => {
@@ -96,9 +136,11 @@ const App: React.FC = () => {
           groupName={groupName} 
           roommates={roommates} 
           debts={debts} 
+          stats={stats}
           currentUser={currentUser!}
           onAddBill={() => setView(AppView.ADD_BILL)}
           onViewHistory={() => setView(AppView.HISTORY)}
+          onExport={exportData}
         />;
       case AppView.ADD_BILL:
         return <AddBill 
